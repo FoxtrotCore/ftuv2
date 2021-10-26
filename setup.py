@@ -24,6 +24,8 @@ setuptools.setup(
         "Operating System :: OS Independent"
     ],
     install_requires=[
+        "opencv-python",
+        "numpy"
     ],
     extras_require={
         "dev": [
