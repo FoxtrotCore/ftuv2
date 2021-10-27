@@ -1,25 +1,37 @@
 import os
+import csv
 import argparse
-import cv2.cv2 as c
-from .video_loader import VideoLoader
+from .classifier import Classifier
 from . import APP_NAME, APP_DESCRIPTION
+
+
+def train(args):
+    pass
+
+def test(args):
+    pass
+
 
 def main():
     parser = argparse.ArgumentParser(prog=APP_NAME, description=APP_DESCRIPTION)
-    parser.add_argument('-d', '--destination',
-                        dest='dest_path',
+    parser.add_argument('-tn', '--training-data',
+                        dest='training_data_path',
                         type=str,
-                        default='~/Documents/ftf/training-set')
-    parser.add_argument('video_path',
+                        help='Path to the training data')
+    parser.add_argument('-tt', '--testing-data',
+                        dest='testing_data_path',
                         type=str,
-                        help='Path to the video to analyze')
+                        help='Path to the testing data')
+    parser.add_argument('action',
+                        type=str,
+                        choices=['train', 'test'],
+                        default='train',
+                        help='Which mode to run the model in.')
     args = parser.parse_args()
-    dest_path = os.path.expanduser(args.dest_path)
-    os.makedirs(dest_path, exist_ok=True)
 
-    try:
-        with VideoLoader(args.video_path) as video:
-            for i, frame in video:
-                c.imwrite(f'{dest_path}/{i}-frame.png', frame)
-    except KeyboardInterrupt:
-        print('Goodbye!')
+    # Determine the action then run it
+    mode = {
+        'train': train,
+        'test': test
+    }[args.action]
+    mode(args)
