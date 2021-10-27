@@ -16,7 +16,10 @@ def main():
     args = parser.parse_args()
     dest_path = os.path.expanduser(args.dest_path)
     os.makedirs(dest_path, exist_ok=True)
-    video = VideoLoader(args.video_path)
 
-    for i, frame in video:
-        c.imwrite(f'{dest_path}/{i}-frame.png', frame)
+    try:
+        with VideoLoader(args.video_path) as video:
+            for i, frame in video:
+                c.imwrite(f'{dest_path}/{i}-frame.png', frame)
+    except KeyboardInterrupt:
+        print('Goodbye!')

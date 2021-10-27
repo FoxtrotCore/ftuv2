@@ -5,6 +5,14 @@ class VideoLoader:
     def __init__(self: VideoLoader, path: str):
         self.video = c.VideoCapture(path)
 
+    def __enter__(self: VideoLoader) -> VideoLoader:
+        return self
+
+    def __exit__(self: VideoLoader,
+                 etype: str,
+                 evalue: str,
+                 traceback: any) -> None:
+        pass
 
     def __iter__(self: VideoLoader) -> VideoLoader:
         self.frame_number = 0
