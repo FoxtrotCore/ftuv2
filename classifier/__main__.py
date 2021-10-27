@@ -9,7 +9,7 @@ def main():
     parser.add_argument('-d', '--destination',
                         dest='dest_path',
                         type=str,
-                        default='~/Downloads/frames')
+                        default='~/Documents/ftf/training-set')
     parser.add_argument('video_path',
                         type=str,
                         help='Path to the video to analyze')
