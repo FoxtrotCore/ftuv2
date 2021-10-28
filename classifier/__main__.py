@@ -9,11 +9,11 @@ from . import APP_NAME, APP_DESCRIPTION
 
 
 UNITS = {
-    0: 'B',
-    1: 'KB',
-    2: 'MB',
-    3: 'GB',
-    4: 'TB'
+    'B': 0,
+    'KB': 1,
+    'MB': 2,
+    'GB': 3,
+    'TB': 4
 }
 
 
@@ -24,7 +24,7 @@ def trunc_mem_usage() -> str:
     mem_unit = 'N/A'
     mem_usage = -1
 
-    for exp, unit in UNITS.items():
+    for unit, exp in UNITS.items():
         usage = math.floor(net_usage / 1024 ** exp)
         if(usage < 1):
             break
@@ -32,6 +32,19 @@ def trunc_mem_usage() -> str:
         mem_usage = usage
 
     return f'{mem_usage} {mem_unit}'
+
+
+def max_usage_exceeded(limit: str) -> bool:
+    process = psutil.Process(os.getpid())
+    net_usage = process.memory_info().rss
+
+    limit_usage = int(limit.split(' ')[0])
+    limit_unit = limit.split(' ')[1].upper()
+    exp = UNITS[limit_unit]
+    net_limit = limit_usage * (1024 ** exp)
+
+    return net_usage > net_limit
+
 
 
 def train(classifier: Classifier):
@@ -54,6 +67,10 @@ def main():
                         dest='testing_data_path',
                         type=str,
                         help='Path to the testing data.')
+    parser.add_argument('-m', '--max-mem-usage',
+                        dest='max_mem_usage',
+                        type=str,
+                        help='Set a limit for maximum amount of memory used. (Throttles loaded data set).')
     parser.add_argument('action',
                         type=str,
                         choices=['train', 'test'],
@@ -82,6 +99,9 @@ def main():
     labels = labels[1:] # Toss the header row
     print(f'Gathered {len(labels)} labels for {args.action} mode!')
 
+    # Fetch the mem limit info
+    has_limit = args.max_mem_usage is not None
+
     # Load in the necessary frames
     frames = []
     for label in labels:
@@ -96,6 +116,10 @@ def main():
 
         # Get and display ative memory usage
         print(f'Using {trunc_mem_usage()} of memory!')
+
+        if(has_limit and max_usage_exceeded(args.max_mem_usage.upper())):
+            print(f'{trunc_mem_usage()}/{args.max_mem_usage.upper()} memory has been used! Ending frame loading!')
+            break
     print(f'Loaded {len(frames)} frames from disk!')
 
     # Create the classifier
